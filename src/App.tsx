@@ -14,7 +14,8 @@ import {
   GenerationRecord, 
   SystemNotification, 
   ThemeConfig, 
-  AppStateData 
+  AppStateData,
+  LoginAuditLog
 } from './types';
 import { getSecureItem, setSecureItem } from './utils/crypto';
 
@@ -151,6 +152,7 @@ export default function App() {
     }
   ]);
   const [adminPassword, setAdminPassword] = useState<string>('ag2026');
+  const [loginLogs, setLoginLogs] = useState<LoginAuditLog[]>([]);
 
   // Sync state trackers
   const [isSyncing, setIsSyncing] = useState(false);
@@ -177,6 +179,7 @@ export default function App() {
     const cachedGenerations = getSecureItem<GenerationRecord[]>('generations');
     const cachedNotifs = getSecureItem<SystemNotification[]>('notifications');
     const cachedAdminPass = getSecureItem<string>('adminPassword');
+    const cachedLoginLogs = getSecureItem<LoginAuditLog[]>('loginLogs');
     const cachedLastSync = localStorage.getItem('mbg_last_synced_time');
 
     if (cachedUsers) setUsers(cachedUsers);
@@ -184,6 +187,7 @@ export default function App() {
     if (cachedGenerations) setGenerations(cachedGenerations);
     if (cachedNotifs) setNotifications(cachedNotifs);
     if (cachedAdminPass) setAdminPassword(cachedAdminPass);
+    if (cachedLoginLogs) setLoginLogs(cachedLoginLogs);
     if (cachedLastSync) setLastSynced(cachedLastSync);
 
     // 3. Sync and restore securely from cloud backend in full-stack setup
@@ -199,6 +203,7 @@ export default function App() {
             if (dbData.generations?.length) setGenerations(dbData.generations);
             if (dbData.notifications?.length) setNotifications(dbData.notifications);
             if (dbData.adminPassword) setAdminPassword(dbData.adminPassword);
+            if (dbData.loginLogs?.length) setLoginLogs(dbData.loginLogs);
             
             // Persist locally too
             setSecureItem('users', dbData.users);
@@ -206,6 +211,7 @@ export default function App() {
             setSecureItem('generations', dbData.generations);
             setSecureItem('notifications', dbData.notifications);
             setSecureItem('adminPassword', dbData.adminPassword);
+            setSecureItem('loginLogs', dbData.loginLogs || []);
           }
         }
       } catch (err) {
@@ -254,6 +260,10 @@ export default function App() {
   useEffect(() => {
     setSecureItem('adminPassword', adminPassword);
   }, [adminPassword]);
+
+  useEffect(() => {
+    setSecureItem('loginLogs', loginLogs);
+  }, [loginLogs]);
 
 
   // ------------------ HANDLERS ------------------
@@ -339,7 +349,8 @@ export default function App() {
       defaultPrompts,
       generations,
       notifications: updatedNotifs,
-      adminPassword
+      adminPassword,
+      loginLogs
     };
 
     try {
@@ -420,8 +431,20 @@ export default function App() {
       isRead: false,
       createdAt: new Date().toISOString()
     };
-    const updatedNotifs = [entryNotif, ...notifications];
     setNotifications(prev => [entryNotif, ...prev]);
+
+    // ✅ Create login audit log
+    const loginLog: LoginAuditLog = {
+      id: 'login_' + Date.now(),
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name,
+      action: 'login',
+      provider: user.provider,
+      timestamp: new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown'
+    };
+    setLoginLogs(prev => [loginLog, ...prev]);
 
     // Save and sync database states immediately
     if (!adminAccess) {
@@ -429,8 +452,9 @@ export default function App() {
         users: updatedUsers,
         defaultPrompts,
         generations,
-        notifications: updatedNotifs,
-        adminPassword
+        notifications: [entryNotif, ...notifications],
+        adminPassword,
+        loginLogs: [loginLog, ...loginLogs]
       };
       
       fetch('/api/backup', {
@@ -444,6 +468,21 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    if (currentUser) {
+      // ✅ Create logout audit log
+      const logoutLog: LoginAuditLog = {
+        id: 'logout_' + Date.now(),
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        userName: currentUser.name,
+        action: 'logout',
+        provider: currentUser.provider,
+        timestamp: new Date().toISOString(),
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown'
+      };
+      setLoginLogs(prev => [logoutLog, ...prev]);
+    }
+
     setCurrentUser(null);
     setIsAdmin(false);
     setActiveScreen('auth');
@@ -594,7 +633,7 @@ export default function App() {
               </div>
 
               {/* Secure Node Status Pill */}
-              <div className="hidden lg:flex items-center gap-2 text-xs font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl font-bold animate-pulse">
+              <div className="hidden lg:flex items-center gap-2 text-xs font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl font-bold">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span>CYBER LAYER ONLINE ● CRYPTO_VERIFY_PASS</span>
               </div>
@@ -643,6 +682,7 @@ export default function App() {
                   adminPasswordCurrent={adminPassword}
                   onChangeAdminPassword={setAdminPassword}
                   lang={themeConfig.lang}
+                  loginLogs={loginLogs}
                 />
               )}
             </div>
