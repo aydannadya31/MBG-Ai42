@@ -1,0 +1,53 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "email": "admin@mbgai42.com",
+      "password": "admin",
+      "name": "Yönetici",
+      "provider": "email",
+      "joinedAt": "2026-05-22T11:06:28.035Z"
+    }
+  ],
+  "defaultPrompts": [
+    {
+      "id": "p1",
+      "text": "Neon cyber-cat holographic portrait",
+      "isSystem": true,
+      "category": "Futuristic",
+      "tag": "Cyber"
+    },
+    {
+      "id": "p2",
+      "text": "Golden sunrise majestic mountains geometric peaks landscape",
+      "isSystem": true,
+      "category": "Nature",
+      "tag": "Doğa"
+    },
+    {
+      "id": "p3",
+      "text": "Cyberpunk humanoid robot interface terminal circuit connections",
+      "isSystem": true,
+      "category": "Technology",
+      "tag": "Y.Z."
+    },
+    {
+      "id": "p4",
+      "text": "Cosmic celestial wormhole swirl magenta and stardust particles",
+      "isSystem": true,
+      "category": "Space",
+      "tag": "Uzay"
+    }
+  ],
+  "generations": [],
+  "notifications": [
+    {
+      "id": "n_welcome",
+      "text": "MBG Ai42 sistemine hoş geldiniz! Güvenli bulut depolama aktif.",
+      "type": "system",
+      "isRead": false,
+      "createdAt": "2026-05-22T11:06:28.035Z"
+    }
+  ],
+  "adminPassword": "ag2026"
+}

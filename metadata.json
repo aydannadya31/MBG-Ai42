@@ -1,0 +1,6 @@
+{
+  "name": "MBG Ai42",
+  "description": "Premium AI Image Generation & Creative Prompt Management Workspace",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
