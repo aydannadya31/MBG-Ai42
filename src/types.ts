@@ -40,12 +40,26 @@ export interface SystemNotification {
   email?: string; // for password resets
 }
 
+// Login Audit Log - Tracks user login/logout events
+export interface LoginAuditLog {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  action: 'login' | 'logout';
+  provider: 'email' | 'google' | 'apple';
+  timestamp: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
 export interface AppStateData {
   users: User[];
   defaultPrompts: PromptItem[];
   generations: GenerationRecord[];
   notifications: SystemNotification[];
   adminPassword: string;
+  loginLogs?: LoginAuditLog[]; // User login/logout records
 }
 
 export interface ThemeConfig {
