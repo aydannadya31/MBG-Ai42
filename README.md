@@ -8,6 +8,8 @@ This contains everything you need to run your app locally.
 
 ## Run Locally
 
+https://aydannadya31.github.io/MBG-Ai42/
+
 **Prerequisites:**  Node.js
 
 
